@@ -1,22 +1,10 @@
 ﻿#pragma once
 
 #include <set>
-#include <functional>
 
-/*
-Шаблонный интерфейс IObserver. Его должен реализовывать класс, 
-желающий получать уведомления от соответствующего IObservable
-Параметром шаблона является тип аргумента,
-передаваемого Наблюдателю в метод Update
-*/
+
 template <typename T>
-class IObserver
-{
-public:
-	virtual void Update(T const& data, const std::string &stationName) = 0;
-	virtual ~IObserver() = default;
-};
-
+class IObserver;
 /*
 Шаблонный интерфейс IObservable. Позволяет подписаться и отписаться на оповещения, а также
 инициировать рассылку уведомлений зарегистрированным наблюдателям.
@@ -29,9 +17,11 @@ public:
 	virtual void RegisterObserver(IObserver<T> & observer) = 0;
 	virtual void NotifyObservers() = 0;
 	virtual void RemoveObserver(IObserver<T> & observer) = 0;
+	virtual std::string GetName() = 0;
 };
 
 // Реализация интерфейса IObservable
+
 template <class T>
 class CObservable : public IObservable<T>
 {
@@ -53,13 +43,17 @@ public:
 		T data = GetChangedData();
 		for (auto & observer : m_observers)
 		{
-			observer->Update(data, m_stationName);
+			observer->Update(data, *this);
 		}
 	}
 
 	void RemoveObserver(ObserverType & observer) override
 	{
 		m_observers.erase(&observer);
+	}
+
+	std::string GetName() {
+		return m_stationName;
 	}
 
 protected:
@@ -70,4 +64,18 @@ protected:
 private:
 	std::set<ObserverType *> m_observers;
 	std::string m_stationName;
+};
+
+/*
+Шаблонный интерфейс IObserver. Его должен реализовывать класс,
+желающий получать уведомления от соответствующего IObservable
+Параметром шаблона является тип аргумента,
+передаваемого Наблюдателю в метод Update
+*/
+template <typename T>
+class IObserver
+{
+public:
+	virtual void Update(T const& data, IObservable<T> &stationName) = 0;
+	virtual ~IObserver() = default;
 };

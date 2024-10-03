@@ -18,9 +18,9 @@ private:
 		Классу CObservable он будет доступен все равно, т.к. в интерфейсе IObserver он
 		остается публичным
 	*/
-	void Update(SWeatherInfo const& data, const std::string &stationName) override
+	void Update(SWeatherInfo const& data, IObservable<SWeatherInfo> &station) override
 	{
-		std::cout << "Station - " << stationName << std::endl;
+		std::cout << "Station - " << station.GetName() << std::endl;
 		std::cout << "Current Temp " << data.temperature << std::endl;
 		std::cout << "Current Hum " << data.humidity << std::endl;
 		std::cout << "Current Pressure " << data.pressure << std::endl;
@@ -35,7 +35,7 @@ private:
 	Классу CObservable он будет доступен все равно, т.к. в интерфейсе IObserver он
 	остается публичным
 	*/
-	void Update(SWeatherInfo const& data, const std::string &stationName) override
+	void Update(SWeatherInfo const& data, IObservable<SWeatherInfo> &station) override
 	{
 		if (m_minTemperature > data.temperature)
 		{
@@ -48,7 +48,7 @@ private:
 		m_accTemperature += data.temperature;
 		++m_countAcc;
 
-		std::cout << "Station - " << stationName << std::endl;
+		std::cout << "Station - " << station.GetName() << std::endl;
 		std::cout << "Max Temp " << m_maxTemperature << std::endl;
 		std::cout << "Min Temp " << m_minTemperature << std::endl;
 		std::cout << "Average Temp " << (m_accTemperature / m_countAcc) << std::endl;
