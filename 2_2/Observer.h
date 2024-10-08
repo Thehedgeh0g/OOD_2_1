@@ -51,6 +51,7 @@ public:
 		{
 			observer->Update(data);
 		}
+		observersCopy.clear();
 	}
 
 	void RemoveObserver(ObserverType & observer) override

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include <map>
-#include <set>
 #include <functional>
+#include <unordered_set>
 
 /*
 Шаблонный интерфейс IObserver. Его должен реализовывать класс, 
@@ -42,36 +42,38 @@ public:
 	// Регистрация наблюдателя с приоритетом
 	void RegisterObserver(ObserverType& observer, int priority = 0) override
 	{
-		auto it = m_observersByPriority.find(priority);
-		for (auto& [prio, obs] : m_observersByPriority)
-		{
-			if (obs == &observer)
-			{
-				return; // Наблюдатель уже подписан
-			}
-		}
-		m_observersByPriority.insert({priority, &observer});
+		auto result = m_observersByPriority.insert({priority, {}});
+		result.first->second.insert(&observer);
+		m_observerToPriority[&observer] = priority;
 	}
 
 	void NotifyObservers() override
 	{
 		T data = GetChangedData();
-		// Уведомляем наблюдателей по порядку приоритетов от высокого к низкому
-		for (auto& [priority, observer] : m_observersByPriority)
+		auto observersCopy = m_observersByPriority;
+		for (auto it = observersCopy.rbegin(); it != observersCopy.rend(); ++it)
 		{
-			observer->Update(data);
+			for (auto& observer : it->second)
+			{
+				observer->Update(data);
+			}
 		}
 	}
 
 	void RemoveObserver(ObserverType& observer) override
 	{
-		for (auto it = m_observersByPriority.begin(); it != m_observersByPriority.end(); ++it)
+		auto it = m_observerToPriority.find(&observer);
+		if (it != m_observerToPriority.end())
 		{
-			if (it->second == &observer)
+			int priority = it->second;
+			m_observersByPriority[priority].erase(&observer);
+
+			if (m_observersByPriority[priority].empty())
 			{
-				m_observersByPriority.erase(it);
-				return;
+				m_observersByPriority.erase(priority);
 			}
+
+			m_observerToPriority.erase(it);
 		}
 	}
 
@@ -79,11 +81,6 @@ protected:
 	virtual T GetChangedData() const = 0;
 
 private:
-	struct Compare {
-		bool operator()(const int& lhs, const int& rhs) const {
-			return lhs > rhs;
-		}
-	};
-
-	std::map<int, ObserverType*, Compare> m_observersByPriority;
+	std::unordered_map<ObserverType*, int> m_observerToPriority;
+	std::map<int, std::unordered_set<ObserverType *>> m_observersByPriority;
 };

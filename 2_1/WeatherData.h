@@ -46,10 +46,14 @@ private:
 
 class CStatsDisplay : public IObserver<SWeatherInfo> {
 private:
+    const std::string TEMPERATURE_STAT_NAME = "temperature";
+    const std::string HUMIDITY_STAT_NAME = "humidity";
+    const std::string PRESSURE_STAT_NAME = "pressure";
+
     void Update(SWeatherInfo const &data) override {
-        m_calculatedStats["Temperature"].Update(data.temperature);
-        m_calculatedStats["Humidity"].Update(data.humidity);
-        m_calculatedStats["Pressure"].Update(data.pressure);
+        m_calculatedStats[TEMPERATURE_STAT_NAME].Update(data.temperature);
+        m_calculatedStats[HUMIDITY_STAT_NAME].Update(data.humidity);
+        m_calculatedStats[PRESSURE_STAT_NAME].Update(data.pressure);
 
         for (auto const &name: m_statNames) {
             PrintStats(m_calculatedStats[name], name);
@@ -64,15 +68,13 @@ private:
                 << ", Average: " << stat.GetAverage() << std::endl;
     }
 
+    //Вынести названия в константы
     const std::vector<std::string> m_statNames = {
-        "Temperature",
-        "Humidity",
-        "Pressure"
+        TEMPERATURE_STAT_NAME,
+        HUMIDITY_STAT_NAME,
+        PRESSURE_STAT_NAME
     };
 
-    CalculatedStat m_temperatureStats;
-    CalculatedStat m_humidityStats;
-    CalculatedStat m_pressureStats;
     std::map<std::string, CalculatedStat> m_calculatedStats;
 };
 
