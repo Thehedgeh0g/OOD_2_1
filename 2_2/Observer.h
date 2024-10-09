@@ -9,11 +9,12 @@
 Параметром шаблона является тип аргумента,
 передаваемого Наблюдателю в метод Update
 */
-template <typename T>
+template<typename T>
 class IObserver
 {
 public:
-	virtual void Update(T const& data) = 0;
+	virtual void Update(T const &data) = 0;
+
 	virtual ~IObserver() = default;
 };
 
@@ -21,24 +22,27 @@ public:
 Шаблонный интерфейс IObservable. Позволяет подписаться и отписаться на оповещения, а также
 инициировать рассылку уведомлений зарегистрированным наблюдателям.
 */
-template <typename T>
+template<typename T>
 class IObservable
 {
 public:
 	virtual ~IObservable() = default;
-	virtual void RegisterObserver(IObserver<T> & observer) = 0;
+
+	virtual void RegisterObserver(IObserver<T> &observer) = 0;
+
 	virtual void NotifyObservers() = 0;
-	virtual void RemoveObserver(IObserver<T> & observer) = 0;
+
+	virtual void RemoveObserver(IObserver<T> &observer) = 0;
 };
 
 // Реализация интерфейса IObservable
-template <class T>
+template<class T>
 class CObservable : public IObservable<T>
 {
 public:
 	typedef IObserver<T> ObserverType;
 
-	void RegisterObserver(ObserverType & observer) override
+	void RegisterObserver(ObserverType &observer) override
 	{
 		m_observers.insert(&observer);
 	}
@@ -47,14 +51,14 @@ public:
 	{
 		auto observersCopy = m_observers;
 		T data = GetChangedData();
-		for (auto & observer : observersCopy)
+		for (auto &observer: observersCopy)
 		{
 			observer->Update(data);
 		}
 		observersCopy.clear();
 	}
 
-	void RemoveObserver(ObserverType & observer) override
+	void RemoveObserver(ObserverType &observer) override
 	{
 		m_observers.erase(m_observers.find(&observer));
 	}
@@ -62,7 +66,7 @@ public:
 protected:
 	// Классы-наследники должны перегрузить данный метод,
 	// в котором возвращать информацию об изменениях в объекте
-	virtual T GetChangedData()const = 0;
+	virtual T GetChangedData() const = 0;
 
 private:
 	std::set<ObserverType *> m_observers;
