@@ -46,6 +46,7 @@ public:
 	// Регистрация наблюдателя с приоритетом
 	void RegisterObserver(ObserverType &observer, int priority = 0) override
 	{
+		// закрыть в try catch
 		auto result = m_observersByPriority.insert({priority, {}});
 		result.first->second.insert(&observer);
 		m_observerToPriority[&observer] = priority;
@@ -70,6 +71,7 @@ public:
 		if (it != m_observerToPriority.end())
 		{
 			int priority = it->second;
+			//TODO: Избавиться от []
 			m_observersByPriority[priority].erase(&observer);
 
 			if (m_observersByPriority[priority].empty())
